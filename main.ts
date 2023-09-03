@@ -2,24 +2,26 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 
 // Remember to rename these classes and interfaces!
 
-interface MyPluginSettings {
-	mySetting: string;
+interface GlobalSettings {
+	email: string;
+	password: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+const DEFAULT_SETTINGS: GlobalSettings = {
+	email: 'default',
+	password: 'default'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class DidaSyncPlugin extends Plugin {
+	settings: GlobalSettings;
 
 	async onload() {
 		await this.loadSettings();
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('dice', '同步清单', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+			new Notice('hello!');
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -66,7 +68,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new GlobalSettingTab(this.app, this));
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -107,10 +109,10 @@ class SampleModal extends Modal {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class GlobalSettingTab extends PluginSettingTab {
+	plugin: DidaSyncPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: DidaSyncPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -121,14 +123,42 @@ class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('邮箱')
+			.setDesc('嘀嗒清单的账号邮箱')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setPlaceholder('输入邮箱')
+				.setValue(this.plugin.settings.email)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.email = value;
 					await this.plugin.saveSettings();
 				}));
+		new Setting(containerEl)
+		.setName('密码')
+		.setDesc('账号的密码')
+		.addText((text) => {
+			text
+				.setPlaceholder('输入密码')
+				.setValue(this.plugin.settings.email)
+				.onChange(async (value) => {
+					this.plugin.settings.password = value;
+					await this.plugin.saveSettings();
+				});
+	
+			// 设置输入元素的类型为 "password" 以隐藏密码
+			text.inputEl.type = "password";
+	
+			// 添加切换按钮
+			new Setting(containerEl)
+				.addToggle((toggle) => {
+					toggle
+						.setValue(false)
+						.setTooltip('显示密码')
+						.onChange(async (value) => {
+							// 如果切换按钮被选中（value 为 true），则将输入元素的类型设置为 "text" 以显示密码
+							// 否则，将输入元素的类型设置为 "password" 以隐藏密码
+							text.inputEl.type = value ? "text" : "password";
+						});
+				});
+		});
 	}
 }

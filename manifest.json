@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "obsidian-dida-sync",
+	"name": "Dida Sync",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "将嘀嗒清单的笔记同步到 ob 里",
+	"author": "c2square",
+	"authorUrl": "https://github.com/c2square",
 	"isDesktopOnly": false
 }

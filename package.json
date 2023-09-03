@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "obsidian-dida-sync",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "将嘀嗒清单的笔记同步到 ob 里",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
