@@ -1,16 +1,6 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-
-// Remember to rename these classes and interfaces!
-
-interface GlobalSettings {
-	email: string;
-	password: string;
-}
-
-const DEFAULT_SETTINGS: GlobalSettings = {
-	email: 'default',
-	password: 'default'
-}
+import Dida365Api from 'dida/dida';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin,  } from 'obsidian';
+import { GlobalSettings,DEFAULT_SETTINGS,GlobalSettingTab } from 'settings/settings';
 
 export default class DidaSyncPlugin extends Plugin {
 	settings: GlobalSettings;
@@ -21,7 +11,14 @@ export default class DidaSyncPlugin extends Plugin {
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', '同步清单', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('hello!');
+			new Notice('start');
+			let dida = new Dida365Api(this.settings.email,this.settings.password)
+			const tasks = dida.get_tasks(this.settings.project_id)
+			tasks.then((items) => {
+				items.forEach((item) => {
+					new Notice(item.title);
+				})
+			})
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -106,59 +103,5 @@ class SampleModal extends Modal {
 	onClose() {
 		const {contentEl} = this;
 		contentEl.empty();
-	}
-}
-
-class GlobalSettingTab extends PluginSettingTab {
-	plugin: DidaSyncPlugin;
-
-	constructor(app: App, plugin: DidaSyncPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName('邮箱')
-			.setDesc('嘀嗒清单的账号邮箱')
-			.addText(text => text
-				.setPlaceholder('输入邮箱')
-				.setValue(this.plugin.settings.email)
-				.onChange(async (value) => {
-					this.plugin.settings.email = value;
-					await this.plugin.saveSettings();
-				}));
-		new Setting(containerEl)
-		.setName('密码')
-		.setDesc('账号的密码')
-		.addText((text) => {
-			text
-				.setPlaceholder('输入密码')
-				.setValue(this.plugin.settings.email)
-				.onChange(async (value) => {
-					this.plugin.settings.password = value;
-					await this.plugin.saveSettings();
-				});
-	
-			// 设置输入元素的类型为 "password" 以隐藏密码
-			text.inputEl.type = "password";
-	
-			// 添加切换按钮
-			new Setting(containerEl)
-				.addToggle((toggle) => {
-					toggle
-						.setValue(false)
-						.setTooltip('显示密码')
-						.onChange(async (value) => {
-							// 如果切换按钮被选中（value 为 true），则将输入元素的类型设置为 "text" 以显示密码
-							// 否则，将输入元素的类型设置为 "password" 以隐藏密码
-							text.inputEl.type = value ? "text" : "password";
-						});
-				});
-		});
 	}
 }
