@@ -1,5 +1,5 @@
 import Dida365Api from 'dida/dida';
-import { App, Editor, MarkdownView, Modal, Notice, Plugin,  } from 'obsidian';
+import { moment,App, Editor, MarkdownView, Modal, Notice, Plugin,TFile  } from 'obsidian';
 import { GlobalSettings,DEFAULT_SETTINGS,GlobalSettingTab } from 'settings/settings';
 
 export default class DidaSyncPlugin extends Plugin {
@@ -13,10 +13,24 @@ export default class DidaSyncPlugin extends Plugin {
 			// Called when the user clicks the icon.
 			new Notice('start');
 			let dida = new Dida365Api(this.settings.email,this.settings.password)
-			const tasks = dida.get_tasks(this.settings.project_id)
+			const tasks = dida.getTasks(this.settings.project_id)
 			tasks.then((items) => {
 				items.forEach((item) => {
 					new Notice(item.title);
+					const path = this.settings.save_dir+"/"+item.title+'.md'
+					const file = this.app.vault.getAbstractFileByPath(path);
+					if (!file) {
+						// 文件不存在，创建文件并写入数据
+						this.app.vault.create(path, item.content);
+					}else{
+						// 文件已经存在，向文件中追加数据
+						const now = moment().format("YYYY-MM-DD HH:mm:ss");
+						const prefix = '\n\n---\n\n'
+						const newData = `${prefix}更新时间: ${now}\n${item.content}`;
+						this.app.vault.append(file as TFile, newData);
+					}
+					dida.completeTask(item)
+					console.log("file:",file)
 				})
 			})
 		});

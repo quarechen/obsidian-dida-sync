@@ -85,7 +85,7 @@ class Dida365Api {
     return result;
   }
 
-  public async get_all_task(){
+  public async getAllTasks(){
     await this.login();
     const url = `https://api.dida365.com/api/v2/batch/check/0`;
     const result = await requestUrl({
@@ -100,13 +100,12 @@ class Dida365Api {
     return result.syncTaskBean.update as Item[];
   }
 
-  public async get_tasks(project_id: string){
-    let tasks = await this.get_all_task()
+  public async getTasks(project_id: string){
+    let tasks = await this.getAllTasks()
     return tasks.filter((task) => task.projectId === project_id);
   }
 
-  public async completeTask(task: any): Promise<string | undefined> {
-    const cookies = { t: this.token };
+  public async completeTask(task: Item)  {
     task.status = 2;
     const req = {
       add: [],
@@ -116,24 +115,18 @@ class Dida365Api {
       update: [task],
       updateAttachments: [],
     };
-    const config: AxiosRequestConfig = {
-      method: 'post',
-      url: 'https://api.dida365.com/api/v2/batch/task/',
-      headers: this.headers,
-      withCredentials: true,
-      params: cookies,
-      data: JSON.stringify(req),
-    };
-    try {
-      const response = await axios(config);
-      if (response.status === 200) {
-        return response.data;
-      } else {
-        console.log(`error: ${response.headers}, body: ${response.data}`);
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    const url = 'https://api.dida365.com/api/v2/batch/task/';
+    const result = await requestUrl({
+      url,
+      headers: {
+        Cookie: this.cookieHeader,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify(req),
+    }).then(r => r.json);
+    console.log("completeTask:",result);
+    return result
   }
 }
 
