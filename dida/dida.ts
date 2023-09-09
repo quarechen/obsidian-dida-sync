@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { Notice,requestUrl } from 'obsidian';
 
-export type Item = {
+export type TaskItem = {
     id: string;
     projectId: string;
     sortOrder: number;
@@ -43,15 +43,8 @@ export type Item = {
   };
 
 class Dida365Api {
-  private headers = {
-    'X-Device': '{"platform":"web","os":"macOS 10.15.7","device":"Chrome 115.0.0.0","name":"","version":4575,"id":"64f3eb32554266500ec7af06","channel":"website","campaign":"","websocket":""}',
-    'Content-Type': 'application/json',
-    // 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36'
-  };
-
   private email: string;
   private password: string;
-  private token: string;
   private cookies: string[] = [];
   private cookieHeader: string;
 
@@ -97,7 +90,7 @@ class Dida365Api {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     }).then(r => r.json);
 
-    return result.syncTaskBean.update as Item[];
+    return result.syncTaskBean.update as TaskItem[];
   }
 
   public async getTasks(project_id: string){
@@ -105,7 +98,7 @@ class Dida365Api {
     return tasks.filter((task) => task.projectId === project_id);
   }
 
-  public async completeTask(task: Item)  {
+  public async completeTask(task: TaskItem)  {
     task.status = 2;
     const req = {
       add: [],
@@ -127,6 +120,13 @@ class Dida365Api {
     }).then(r => r.json);
     console.log("completeTask:",result);
     return result
+  }
+
+  public projectURL(task:TaskItem){
+    return `https://dida365.com/webapp/#p/${task.projectId}/tasks`
+  }
+  public taskURL(task:TaskItem){
+    return `https://dida365.com/webapp/#p/${task.projectId}/tasks/${task.id}`
   }
 }
 
